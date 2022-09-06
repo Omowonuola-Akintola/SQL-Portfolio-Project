@@ -1,1 +1,11 @@
+###### For this challenge, the assumption is that I just received an urgent request from the General Manager of Analytics at Health Co for assistance with the 
+analysis of the health.user_logs dataset. The Business questions to be answered are listed below and the SQL code I wrote to answer these questions. 
+
+I think this challenge is suitable for those who are just getting started with SQL.
+
+Before I jump into the questions and my solution, I thought it'd be sufficient to show a bit of what the data looks like
+
+#1. 
+SELECT * FROM health.user_logs
+LIMIT 10;
 
