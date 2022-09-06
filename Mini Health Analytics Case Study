@@ -1,4 +1,4 @@
-###### For this challenge, the assumption is that I just received an urgent request from the General Manager of Analytics at Health Co for assistance with the 
+For this challenge, the assumption is that I just received an urgent request from the General Manager of Analytics at Health Co for assistance with the 
 analysis of the health.user_logs dataset. The Business questions to be answered are listed below and the SQL code I wrote to answer these questions. 
 
 I think this challenge is suitable for those who are just getting started with SQL.
@@ -9,3 +9,108 @@ Before I jump into the questions and my solution, I thought it'd be sufficient t
 SELECT * FROM health.user_logs
 LIMIT 10;
 
+Now answering the business questions
+
+--1. How many unique users exist in the logs dataset?
+    SELECT COUNT(DISTINCT id) FROM health.user_logs;
+    
+-------------------------------------------------------------------------------------    
+--2. How many total measurements do we have per user on average?  
+    --create CTE
+    
+    WITH measure_value AS (
+    SELECT 
+      id, 
+      COUNT(*) AS total_count 
+    FROM health.user_logs
+    GROUP by id
+  )
+    SELECT 
+     ROUND (AVG(total_count), 2)
+    FROM measure_value;
+    
+-- 3  How many users have 3 or more measurements?
+    WITH measure_value AS (
+    SELECT 
+      id, 
+      COUNT(*) AS total_count 
+    FROM health.user_logs
+    GROUP by id
+  )
+    SELECT 
+    COUNT(total_count)
+    FROM measure_value
+    WHERE total_count >= 3;
+    
+--4 How many users have 1000 or more measurements?
+
+    WITH measure_value AS (
+    SELECT 
+      id, 
+      COUNT(*) AS total_count 
+    FROM health.user_logs
+    GROUP by id
+  )
+    SELECT 
+    COUNT(total_count)
+    FROM measure_value
+    WHERE total_count >= 1000;
+    
+--I already got into the question before realizing that creating a temp table would be helpful in solving questions 2-4 rather than duplicating the same CTEs
+
+  DROP TABLE IF EXISTS measure_count;
+  CREATE TEMP TABLE measure_count AS
+    SELECT 
+      id, 
+      COUNT(*) AS total_count 
+    FROM health.user_logs
+    GROUP by id;
+    
+    SELECT * FROM measure_count;
+
+--2. 
+    SELECT 
+      ROUND (AVG(total_count), 2)
+    FROM measure_count;
+    
+--3. 
+    SELECT 
+      COUNT(total_count)
+    FROM measure_count
+    WHERE total_count >= 3;
+    
+--4
+    SELECT 
+      COUNT(total_count)
+    FROM measure_count
+    WHERE total_count >= 1000;
+-------------------------------------------------------------------------------------------------------
+
+--5 What is the number of users who have logged blood glucose measurements
+    WITH bloodglucose_count AS (
+    SELECT id, 
+      COUNT(*) AS total_count
+    FROM health.user_logs
+    WHERE measure = 'blood_glucose'
+    GROUP BY id
+  )
+  
+    SELECT COUNT(total_count) FROM bloodglucose_count;  
+
+--6 What is the number of users who have logged 2 types of measurement
+    WITH measure_count AS (
+    SELECT id, 
+      COUNT(DISTINCT measure) AS frequency,
+      COUNT(*) AS total_count
+    FROM health.user_logs
+    GROUP BY id
+  )
+    SELECT COUNT(total_count) 
+    FROM measure_count
+    WHERE frequency >= 2;
+    
+--7 For users with blood pressure measurement, what is the average systolic/diastolic pressure value
+    SELECT ROUND(AVG(systolic), 2) AS systolic, ROUND(AVG(diastolic),2)
+    FROM health.user_logs
+    WHERE measure = 'blood_pressure';
+    
